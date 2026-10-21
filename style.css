@@ -1,0 +1,195 @@
+:root{--bg:#091310;--surface:#12211c;--surface-2:#192b24;--border:#294238;--text:#f0f7f1;--muted:#a9c0b2;--accent:#69e4ae;--accent-ink:#092117;--danger:#ffaaa4}
+*{box-sizing:border-box}
+body{margin:0;font-family:"DM Sans",sans-serif;color:var(--text);background:var(--bg)}
+body.light{--bg:#f1f6f0;--surface:#fff;--surface-2:#e8f1e9;--border:#cbded0;--text:#153025;--muted:#526c5b;--accent:#087a54;--accent-ink:#fff;--danger:#ad302d}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+button:disabled{opacity:.55;cursor:wait}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+
+.app-shell{width:100%;min-height:100vh;background:var(--bg)}
+.app-layout{max-width:1600px;margin:auto;display:grid;grid-template-columns:240px minmax(0,1fr)}
+.sidebar{position:sticky;top:0;height:100vh;padding:30px 18px;border-right:1px solid var(--border);background:var(--surface)}
+.brand{font-family:Fraunces,serif;letter-spacing:-.04em;font-size:29px}
+.brand-mark{width:34px;height:34px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;border-radius:12px;font-weight:700}
+.nav-btn{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border-radius:13px;color:var(--muted);text-align:left;transition:background .2s,color .2s;background:transparent;border:0}
+.nav-btn:hover,.nav-btn.active{background:var(--surface-2);color:var(--accent)}
+.nav-btn svg{width:19px;height:19px;flex:none}
+.content{min-width:0;padding:36px clamp(18px,4vw,60px) 110px}
+.eyebrow{color:var(--accent);letter-spacing:.16em;text-transform:uppercase;font-size:11px;font-weight:700}
+h1,h2,h3{margin:0}
+.page-heading{font-family:Fraunces,serif;font-size:clamp(34px,4vw,53px);letter-spacing:-.045em;line-height:1.1}
+.section-heading{font-family:Fraunces,serif;font-size:25px;letter-spacing:-.025em}
+.muted{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:23px}
+.metric{padding:22px;min-height:144px}
+.metric-value{font-size:clamp(21px,2.3vw,30px);font-weight:700;letter-spacing:-.04em;overflow-wrap:anywhere}
+
+.primary{background:var(--accent);color:var(--accent-ink);border:0;border-radius:12px;padding:11px 17px;font-weight:700;display:inline-flex;gap:8px;align-items:center;justify-content:center}
+.primary:hover{filter:brightness(1.08)}
+.secondary{color:var(--text);background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:10px 14px}
+.secondary:hover{border-color:var(--accent)}
+.danger{color:var(--danger)}
+
+.field{display:flex;flex-direction:column;gap:7px;min-width:0}
+.field label{font-size:13px;font-weight:700;color:var(--muted)}
+.control{width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:11px;padding:11px 12px;color:var(--text);color-scheme:dark;min-height:45px}
+.light .control{color-scheme:light}
+.control::placeholder{color:var(--muted)}
+
+.expense-row{display:flex;align-items:center;gap:13px;padding:15px 0;border-bottom:1px solid var(--border);min-width:0}
+.expense-row:last-child{border-bottom:0}
+.expense-icon{width:42px;height:42px;border-radius:13px;background:var(--surface-2);color:var(--accent);flex:none;display:grid;place-items:center}
+.expense-icon svg{width:20px;height:20px}
+.logo-mark{width:100%;height:100%;display:grid;place-items:center;font-size:11px;font-weight:800;letter-spacing:-.04em;text-align:center;padding:4px}
+.logo-mark.service{border-radius:13px}
+.logo-mark.netflix{background:#e50914;color:#fff}
+.logo-mark.spotify{background:#1ed760;color:#07150d}
+.logo-mark.youtube{background:#ff0033;color:#fff}
+.logo-mark.chatgpt{background:#10a37f;color:#fff}
+.logo-mark.disney{background:#172b68;color:#fff}
+.logo-mark.canva{background:#3157c8;color:#fff}
+.logo-mark.icloud{background:#8dd8ff;color:#123a68}
+.logo-mark.category{background:var(--surface-2);color:var(--accent)}
+.logo-mark.category-logement{background:#7a5c38;color:#ffe3b0}
+.logo-mark.category-internet{background:#245d8f;color:#b9e4ff}
+.logo-mark.category-energie{background:#8b6a20;color:#fff0a8}
+.logo-mark.category-divertissement{background:#70468f;color:#f0d2ff}
+.logo-mark.category-transport{background:#2b6f68;color:#c4fff1}
+.logo-mark.category-autre{background:#53645b;color:#e4f3e7}
+
+.badge{display:inline-block;padding:4px 9px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap}
+.badge.upcoming,.badge.today{color:#b0edcf;background:#204637}
+.badge.paid{color:#8fead2;background:#125246}
+.badge.overdue{color:#ffc29d;background:#593a29}
+.badge.cancelled{color:#c7c9c6;background:#39433d}
+.light .badge.upcoming,.light .badge.today{color:#185e3b;background:#d7f2e1}
+.light .badge.paid{color:#066458;background:#d1f4eb}
+.light .badge.overdue{color:#884315;background:#fff0d8}
+.light .badge.cancelled{color:#505c52;background:#e4e9e3}
+
+.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.day-head{text-align:center;color:var(--muted);font-size:12px;padding:8px 0}
+.day{min-height:74px;border:1px solid transparent;background:var(--surface-2);color:var(--text);border-radius:12px;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;padding:9px}
+.day:hover{border-color:var(--accent)}
+.day.today{color:var(--accent);font-weight:700}
+.day.selected{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.day-dots{display:flex;gap:3px;flex-wrap:wrap}
+.day-dot{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+.day-dot.paid{background:#50bfa7}
+.day-dot.overdue{background:#ed9766}
+.day-dot.cancelled{background:#9da9a0}
+
+.bottom-nav{display:none}
+.fab{position:fixed;right:24px;bottom:25px;width:58px;height:58px;border-radius:19px;z-index:20;box-shadow:0 12px 35px #0008}
+.dialog-backdrop{position:fixed;inset:0;z-index:40;background:#020a08c9;display:grid;place-items:center;padding:15px}
+.dialog-backdrop[hidden],[hidden]{display:none!important}
+.dialog{width:min(100%,650px);max-height:92vh;overflow:auto;padding:25px;box-shadow:0 24px 90px #0009}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:60;background:var(--surface-2);color:var(--text);border:1px solid var(--accent);border-radius:12px;padding:12px 18px;max-width:min(90%,480px);box-shadow:0 15px 35px #0006}
+
+@media(max-width:850px){
+  .app-layout{display:block}
+  .sidebar{display:none}
+  .content{padding:26px 17px 135px}
+  .bottom-nav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;bottom:0;left:0;right:0;z-index:25;background:var(--surface);border-top:1px solid var(--border);padding:8px 4px max(8px,env(safe-area-inset-bottom))}
+  .bottom-nav .nav-btn{flex-direction:column;gap:3px;justify-content:center;text-align:center;padding:5px 1px;font-size:10px}
+  .bottom-nav .nav-btn svg{width:19px;height:19px}
+  .fab{bottom:83px;right:17px}
+  .day{min-height:57px;padding:6px;font-size:12px}
+  .dialog{padding:19px}
+  .toast{bottom:85px}
+}
+@media(max-width:480px){
+  .expense-row{flex-wrap:wrap}
+  .row-actions{width:100%;padding-left:55px}
+  .day{min-height:49px}
+}
+
+/* =========================================================
+   Ajouts : confort mobile, animations, budget, rappels, graphiques
+   ========================================================= */
+html{-webkit-text-size-adjust:100%}
+button,a,select,input{-webkit-tap-highlight-color:transparent}
+button{touch-action:manipulation}
+.control{font-size:16px} /* évite le zoom automatique sur iPhone */
+
+/* --- Transitions générales --- */
+.primary,.secondary,.nav-btn,.day{transition:transform .15s ease,filter .2s ease,border-color .2s ease,background .2s ease,color .2s ease}
+.primary:active,.secondary:active{transform:scale(.96)}
+.day:active{transform:scale(.93)}
+.card{transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}
+.metric:hover{transform:translateY(-3px);box-shadow:0 14px 30px #0004;border-color:var(--accent)}
+.nav-btn svg{transition:transform .25s ease}
+.nav-btn:hover svg,.nav-btn.active svg{transform:scale(1.12)}
+
+/* --- Keyframes --- */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes popIn{0%{opacity:0;transform:scale(.92) translateY(10px)}100%{opacity:1;transform:none}}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,16px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes rowIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+@keyframes badgePop{0%{transform:scale(.6)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes fabPulse{0%{box-shadow:0 12px 35px #0008,0 0 0 0 #69e4ae88}70%{box-shadow:0 12px 35px #0008,0 0 0 18px #69e4ae00}100%{box-shadow:0 12px 35px #0008,0 0 0 0 #69e4ae00}}
+@keyframes growUp{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes bellRing{0%,100%{transform:rotate(0)}15%{transform:rotate(14deg)}30%{transform:rotate(-12deg)}45%{transform:rotate(8deg)}60%{transform:rotate(-6deg)}75%{transform:rotate(0)}}
+@keyframes shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
+
+/* --- Changement de page --- */
+.view-enter{animation:fadeIn .3s ease both}
+.view-enter .card,.view-enter .reminder-banner{animation:fadeUp .5s cubic-bezier(.2,.8,.2,1) backwards}
+.view-enter .card:nth-child(2),.view-enter .metric:nth-child(2){animation-delay:.06s}
+.view-enter .card:nth-child(3),.view-enter .metric:nth-child(3){animation-delay:.12s}
+.view-enter .card:nth-child(4),.view-enter .metric:nth-child(4){animation-delay:.18s}
+
+/* --- Fenêtres (formulaires) --- */
+.dialog-backdrop:not([hidden]){animation:fadeIn .2s ease both}
+.dialog-backdrop:not([hidden]) .dialog{animation:popIn .3s cubic-bezier(.2,.9,.3,1.1) both}
+.toast:not([hidden]){animation:toastIn .3s ease both}
+
+/* --- Lignes et badges --- */
+.expense-row.row-enter{animation:rowIn .4s ease both}
+.row-badge.paid{animation:badgePop .45s ease both}
+.fab{animation:fabPulse 2.6s ease-out 1.2s 3}
+.fab:active{transform:scale(.92)}
+.empty-message{animation:fadeIn .4s ease both}
+
+/* --- Rappel --- */
+.reminder-banner{display:flex;align-items:center;gap:14px;padding:15px 18px;border-radius:18px;border:1px solid var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--surface))}
+.reminder-banner[hidden]{display:none!important}
+.reminder-banner svg{width:22px;height:22px;flex:none;color:var(--accent);animation:bellRing 1.6s ease .6s 2;transform-origin:50% 0}
+.reminder-banner.late{border-color:#ed9766;background:color-mix(in srgb,#ed9766 14%,var(--surface))}
+.reminder-banner.late svg{color:#ed9766}
+.reminder-banner p{font-weight:600}
+
+/* --- Budget --- */
+.progress{height:12px;border-radius:999px;background:var(--surface-2);overflow:hidden}
+.progress>span{display:block;height:100%;width:0;border-radius:999px;background:var(--accent);transition:width .9s cubic-bezier(.2,.8,.2,1),background .3s}
+.progress.warn>span{background:#e9b44c}
+.progress.over>span{background:#ed9766}
+
+/* --- Graphiques --- */
+.bar-row{display:grid;grid-template-columns:minmax(80px,120px) 1fr auto;gap:12px;align-items:center;margin:12px 0}
+.bar-label{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-track{height:10px;background:var(--surface-2);border-radius:999px;overflow:hidden}
+.bar-fill{display:block;height:100%;width:0;border-radius:999px;background:var(--accent);transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.bar-value{font-size:13px;font-weight:700;white-space:nowrap}
+.month-chart{display:flex;align-items:flex-end;gap:10px;height:190px}
+.month-col{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px}
+.month-bar{width:100%;max-width:48px;min-height:4px;border-radius:10px 10px 4px 4px;background:var(--accent);transform-origin:bottom;animation:growUp .8s cubic-bezier(.2,.8,.2,1) both}
+.month-bar.current{background:linear-gradient(180deg,var(--accent),color-mix(in srgb,var(--accent) 55%,var(--surface)))}
+.month-bar.zero{opacity:.35}
+.month-val{font-size:10px;color:var(--muted);white-space:nowrap}
+.month-name{font-size:11px;color:var(--muted);text-transform:capitalize}
+
+/* --- Mobile : zones sûres (iPhone encoche / barre d'accueil) --- */
+@media(max-width:850px){
+  .content{padding-top:calc(26px + env(safe-area-inset-top))}
+  .fab{bottom:calc(83px + env(safe-area-inset-bottom) - 8px)}
+  .month-chart{height:160px;gap:6px}
+  .bar-row{grid-template-columns:minmax(70px,100px) 1fr auto}
+}
+
+/* --- Respect du réglage « réduire les animations » --- */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}

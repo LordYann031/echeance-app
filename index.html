@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Échéance</title>
+  <meta name="theme-color" content="#091310">
+  <meta name="description" content="Suivez vos dépenses récurrentes et vos échéances.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Échéance">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <div class="app-layout">
+      <aside class="sidebar" aria-label="Navigation principale">
+        <div class="flex items-center gap-3 mb-12">
+          <span class="brand-mark" aria-hidden="true">É</span><span class="brand">Échéance</span>
+        </div>
+        <nav aria-label="Pages" class="space-y-2">
+          <button type="button" class="nav-btn active" data-view="home"><i data-lucide="layout-dashboard"></i><span>Accueil</span></button>
+          <button type="button" class="nav-btn" data-view="calendar"><i data-lucide="calendar-days"></i><span>Calendrier</span></button>
+          <button type="button" class="nav-btn" data-view="expenses"><i data-lucide="wallet"></i><span>Dépenses</span></button>
+          <button type="button" class="nav-btn" data-view="history"><i data-lucide="history"></i><span>Historique</span></button>
+          <button type="button" class="nav-btn" data-view="settings"><i data-lucide="settings-2"></i><span>Paramètres</span></button>
+        </nav>
+        <p class="muted text-xs mt-12 leading-relaxed">Vos échéances, au même endroit.</p>
+      </aside>
+
+      <main class="content">
+        <header class="flex flex-wrap items-end justify-between gap-4 mb-9">
+          <div>
+            <p class="eyebrow mb-3">VOTRE ESPACE FINANCIER</p>
+            <h1 id="view-title" class="page-heading">Vue d’ensemble</h1>
+            <p id="view-subtitle" class="muted mt-2">Gardez une longueur d’avance sur vos échéances.</p>
+          </div>
+          <button id="header-add" type="button" class="primary"><i data-lucide="plus" class="w-4 h-4"></i><span>Ajouter une dépense</span></button>
+        </header>
+
+        <div id="load-state" class="card p-8 text-center" role="status" aria-live="polite">
+          <p id="load-message">Chargement de vos dépenses…</p>
+          <button id="retry-load" type="button" class="secondary mt-4 hidden">Réessayer</button>
+        </div>
+
+        <div id="app-views" hidden>
+          <!-- ACCUEIL -->
+          <section id="view-home" aria-label="Tableau de bord">
+            <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4 mb-5">
+              <article class="card metric"><p class="muted mb-4">Prévu ce mois-ci</p><p id="metric-planned" class="metric-value"></p></article>
+              <article class="card metric"><p class="muted mb-4">Payé ce mois-ci</p><p id="metric-paid" class="metric-value"></p></article>
+              <article class="card metric"><p class="muted mb-4">Total restant</p><p id="metric-remaining" class="metric-value"></p></article>
+              <article class="card metric"><p class="muted mb-4">Paiements à venir</p><p id="metric-upcoming" class="metric-value"></p></article>
+            </div>
+            <p id="overdue-count" class="muted mb-4" aria-live="polite"></p>
+            <div id="reminder-banner" class="reminder-banner mb-5" role="status" hidden>
+              <i data-lucide="bell-ring"></i>
+              <p id="reminder-text"></p>
+            </div>
+            <section id="budget-card" class="card p-5 md:p-6 mb-5" hidden aria-label="Budget mensuel">
+              <div class="flex flex-wrap items-baseline justify-between gap-2 mb-3">
+                <h2 class="section-heading" style="font-size:20px">Budget du mois</h2>
+                <p id="budget-text" class="muted text-sm"></p>
+              </div>
+              <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Budget utilisé"><span id="budget-bar"></span></div>
+              <p id="budget-hint" class="muted text-xs mt-2"></p>
+            </section>
+            <div class="grid xl:grid-cols-[1.3fr_1fr] gap-5">
+              <section class="card p-5 md:p-7">
+                <h2 class="section-heading mb-3">Prochaines échéances</h2>
+                <div id="upcoming-list"></div>
+              </section>
+              <section class="card p-5 md:p-7">
+                <h2 class="section-heading mb-3">Dépenses récentes</h2>
+                <div id="recent-list"></div>
+                <button id="quick-add" type="button" class="secondary mt-5 w-full">+ Ajouter rapidement</button>
+              </section>
+            </div>
+            <div class="grid lg:grid-cols-2 gap-5 mt-5">
+              <section class="card p-5 md:p-7" aria-label="Répartition par catégorie">
+                <h2 class="section-heading mb-1">Par catégorie</h2>
+                <p class="muted text-xs mb-4">Dépenses prévues ce mois-ci</p>
+                <div id="stats-category"></div>
+              </section>
+              <section class="card p-5 md:p-7" aria-label="Paiements des derniers mois">
+                <h2 class="section-heading mb-1">6 derniers mois</h2>
+                <p class="muted text-xs mb-4">Montants réellement payés</p>
+                <div id="stats-months" class="month-chart"></div>
+              </section>
+            </div>
+          </section>
+
+          <!-- CALENDRIER -->
+          <section id="view-calendar" hidden aria-label="Calendrier des échéances">
+            <div class="grid xl:grid-cols-[1.4fr_.75fr] gap-5">
+              <section class="card p-4 md:p-7">
+                <div class="flex items-center justify-between gap-2 mb-6 flex-wrap">
+                  <h2 id="calendar-month" class="section-heading capitalize" aria-live="polite"></h2>
+                  <div class="flex gap-2">
+                    <button id="prev-month" type="button" class="secondary" aria-label="Mois précédent"><i data-lucide="chevron-left"></i></button>
+                    <button id="today-month" type="button" class="secondary">Aujourd’hui</button>
+                    <button id="next-month" type="button" class="secondary" aria-label="Mois suivant"><i data-lucide="chevron-right"></i></button>
+                  </div>
+                </div>
+                <div class="calendar-grid mb-1" aria-hidden="true">
+                  <span class="day-head">Lun</span><span class="day-head">Mar</span><span class="day-head">Mer</span><span class="day-head">Jeu</span><span class="day-head">Ven</span><span class="day-head">Sam</span><span class="day-head">Dim</span>
+                </div>
+                <div id="calendar-days" class="calendar-grid" aria-label="Jours du mois"></div>
+              </section>
+              <section class="card p-5 md:p-7">
+                <p class="eyebrow mb-3">DATE SÉLECTIONNÉE</p>
+                <h2 id="selected-date" class="section-heading capitalize"></h2>
+                <p id="selected-total" class="muted mt-2 mb-5"></p>
+                <div id="selected-expenses"></div>
+              </section>
+            </div>
+          </section>
+
+          <!-- DÉPENSES -->
+          <section id="view-expenses" hidden aria-label="Liste des dépenses">
+            <div class="card p-5 md:p-7">
+              <div class="grid md:grid-cols-[1fr_190px_170px] gap-3 mb-5">
+                <div class="field">
+                  <label for="expense-search">Rechercher par nom</label>
+                  <input id="expense-search" class="control" type="search" placeholder="Nom de la dépense">
+                </div>
+                <div class="field">
+                  <label for="category-filter">Catégorie</label>
+                  <select id="category-filter" class="control">
+                    <option value="">Toutes</option><option>Logement</option><option>Internet</option><option>Énergie</option><option>Divertissement</option><option>Transport</option><option>Autre</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="status-filter">Statut</label>
+                  <select id="status-filter" class="control">
+                    <option value="">Tous</option>
+                    <option value="upcoming">À venir</option>
+                    <option value="today">À payer aujourd’hui</option>
+                    <option value="paid">Payée</option>
+                    <option value="overdue">En retard</option>
+                    <option value="cancelled">Résiliée</option>
+                  </select>
+                </div>
+              </div>
+              <p id="expense-count" class="muted mb-2" aria-live="polite"></p>
+              <div id="expense-list"></div>
+            </div>
+          </section>
+
+          <!-- HISTORIQUE -->
+          <section id="view-history" hidden aria-label="Historique des paiements">
+            <div class="card p-5 md:p-7">
+              <h2 class="section-heading mb-4">Paiements enregistrés</h2>
+              <div class="grid sm:grid-cols-3 gap-3 mb-5">
+                <div class="field"><label for="history-search">Rechercher une dépense</label><input id="history-search" type="search" class="control"></div>
+                <div class="field"><label for="history-month">Mois du paiement</label><input id="history-month" type="month" class="control"></div>
+                <div class="field">
+                  <label for="history-method">Mode de paiement</label>
+                  <select id="history-method" class="control">
+                    <option value="">Tous</option><option>Espèces</option><option>Mobile Money</option><option>Carte bancaire</option><option>Virement</option><option>Autre</option>
+                  </select>
+                </div>
+              </div>
+              <div id="history-list"></div>
+            </div>
+          </section>
+
+          <!-- PARAMÈTRES -->
+          <section id="view-settings" hidden aria-label="Paramètres">
+            <div class="card p-5 md:p-7 max-w-2xl">
+              <h2 class="section-heading mb-6">Préférences</h2>
+              <div class="grid sm:grid-cols-2 gap-5">
+                <div class="field">
+                  <label for="language-setting">Langue</label>
+                  <select id="language-setting" class="control" disabled><option>Français</option></select>
+                  <p class="muted">Autres langues prévues dans une prochaine phase.</p>
+                </div>
+                <div class="field">
+                  <label for="currency-setting">Devise principale</label>
+                  <select id="currency-setting" class="control">
+                    <option value="XOF">XOF · Franc CFA</option><option value="EUR">EUR · Euro</option><option value="USD">USD · Dollar</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="theme-setting">Apparence</label>
+                  <select id="theme-setting" class="control"><option value="dark">Sombre</option><option value="light">Clair</option></select>
+                </div>
+                <div class="field">
+                  <label for="budget-setting">Budget mensuel (facultatif)</label>
+                  <input id="budget-setting" class="control" type="number" min="0" step="1" inputmode="decimal" placeholder="0 = pas de budget">
+                  <p class="muted text-xs">Exprimé dans la devise principale.</p>
+                </div>
+                <div class="field">
+                  <label for="reminder-setting">Rappel avant échéance</label>
+                  <select id="reminder-setting" class="control">
+                    <option value="0">Le jour même</option>
+                    <option value="1">1 jour avant</option>
+                    <option value="3">3 jours avant</option>
+                    <option value="7">7 jours avant</option>
+                  </select>
+                </div>
+                <div class="field sm:col-span-2">
+                  <button id="notify-setting" type="button" class="secondary"><span id="notify-label">Activer les notifications du navigateur</span></button>
+                  <p class="muted text-xs">Les notifications s’affichent quand l’application est ouverte. L’encart de rappel sur l’accueil fonctionne toujours.</p>
+                </div>
+              </div>
+              <p class="muted mt-6">Les totaux utilisent la devise principale. Aucune conversion automatique n’est effectuée.</p>
+
+              <div class="border-t mt-8 pt-7" style="border-color:var(--border)">
+                <h3 class="font-bold mb-2" style="font-size:19px">Sauvegarde de vos données</h3>
+                <p id="storage-status" class="muted mb-4"></p>
+                <div class="flex gap-2 flex-wrap">
+                  <button id="export-json" type="button" class="primary"><i data-lucide="download" class="w-4 h-4"></i><span>Exporter une sauvegarde</span></button>
+                  <button id="import-json" type="button" class="secondary"><i data-lucide="upload" class="w-4 h-4"></i><span>Importer une sauvegarde</span></button>
+                  <button id="export-csv" type="button" class="secondary"><i data-lucide="file-spreadsheet" class="w-4 h-4"></i><span>Exporter l’historique (CSV)</span></button>
+                  <input id="import-file" type="file" accept="application/json,.json" hidden>
+                </div>
+                <div id="import-confirm" class="mt-4" hidden>
+                  <p id="import-summary" class="muted mb-3"></p>
+                  <div class="flex gap-2 flex-wrap">
+                    <button id="import-merge" type="button" class="primary">Fusionner avec mes données</button>
+                    <button id="import-replace" type="button" class="secondary danger">Remplacer mes données</button>
+                    <button id="import-cancel" type="button" class="secondary">Annuler</button>
+                  </div>
+                </div>
+              </div>
+              <div class="border-t mt-8 pt-7" style="border-color:var(--border)">
+                <h3 class="font-bold mb-2" style="font-size:19px">Installer sur le téléphone</h3>
+                <p class="muted mb-4">Ajoutez Échéance à votre écran d’accueil : plein écran, ouverture rapide et utilisation sans connexion.</p>
+                <button id="install-btn" type="button" class="primary mb-3" hidden><i data-lucide="smartphone" class="w-4 h-4"></i><span>Installer l’application</span></button>
+                <p class="muted text-xs"><strong>iPhone :</strong> ouvrez le site dans Safari, touchez Partager, puis « Sur l’écran d’accueil ».<br><strong>Android :</strong> menu ⋮ du navigateur, puis « Installer l’application ».</p>
+              </div>
+
+              <div class="border-t mt-8 pt-7" style="border-color:var(--border)">
+                <h3 class="font-bold mb-2" style="font-size:19px">Données de démonstration</h3>
+                <p class="muted mb-4">Supprime uniquement les exemples identifiés comme tels. Vos données réelles restent intactes.</p>
+                <button id="reset-demo" type="button" class="secondary danger">Réinitialiser les données de démonstration</button>
+                <div id="reset-confirm" class="mt-4" hidden>
+                  <p class="muted mb-3">Confirmer la suppression des exemples identifiés ?</p>
+                  <div class="flex gap-2 flex-wrap">
+                    <button id="confirm-reset" type="button" class="primary">Oui, supprimer les exemples</button>
+                    <button id="cancel-reset" type="button" class="secondary">Annuler</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <nav class="bottom-nav" aria-label="Navigation mobile">
+      <button type="button" class="nav-btn active" data-view="home"><i data-lucide="layout-dashboard"></i><span>Accueil</span></button>
+      <button type="button" class="nav-btn" data-view="calendar"><i data-lucide="calendar-days"></i><span>Calendrier</span></button>
+      <button type="button" class="nav-btn" data-view="expenses"><i data-lucide="wallet"></i><span>Dépenses</span></button>
+      <button type="button" class="nav-btn" data-view="history"><i data-lucide="history"></i><span>Historique</span></button>
+      <button type="button" class="nav-btn" data-view="settings"><i data-lucide="settings-2"></i><span>Paramètres</span></button>
+    </nav>
+    <button id="floating-add" type="button" class="fab primary" aria-label="Ajouter une dépense"><i data-lucide="plus"></i></button>
+  </div>
+
+  <!-- FORMULAIRE DÉPENSE -->
+  <div id="expense-overlay" class="dialog-backdrop" hidden>
+    <section class="dialog card" role="dialog" aria-modal="true" aria-labelledby="form-title">
+      <div class="flex justify-between items-start gap-4 mb-5">
+        <div>
+          <p class="eyebrow mb-2">GESTION DES DÉPENSES</p>
+          <h2 id="form-title" class="section-heading">Nouvelle dépense</h2>
+        </div>
+        <button type="button" data-close="expense-overlay" class="secondary" aria-label="Fermer le formulaire"><i data-lucide="x"></i></button>
+      </div>
+      <form id="expense-form" novalidate>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div class="field sm:col-span-2"><label for="f-name">Nom *</label><input id="f-name" class="control" maxlength="100" required></div>
+          <div class="field">
+            <label for="f-category">Catégorie *</label>
+            <select id="f-category" class="control" required>
+              <option value="">Choisir…</option><option>Logement</option><option>Internet</option><option>Énergie</option><option>Divertissement</option><option>Transport</option><option>Autre</option>
+            </select>
+          </div>
+          <div class="field"><label for="f-amount">Montant *</label><input id="f-amount" class="control" type="number" min="0.01" step="0.01" required></div>
+          <div class="field">
+            <label for="f-currency">Devise *</label>
+            <select id="f-currency" class="control"><option value="XOF">XOF · FCFA</option><option value="EUR">EUR · Euro</option><option value="USD">USD · Dollar</option></select>
+          </div>
+          <div class="field">
+            <label for="f-frequency">Fréquence *</label>
+            <select id="f-frequency" class="control">
+              <option value="once">Ponctuelle</option><option value="daily">Quotidienne</option><option value="weekly">Hebdomadaire</option><option value="monthly">Mensuelle</option><option value="yearly">Annuelle</option>
+            </select>
+          </div>
+          <div class="field"><label for="f-start">Date de début *</label><input id="f-start" class="control" type="date" required></div>
+          <div class="field"><label for="f-due">Première échéance prévue *</label><input id="f-due" class="control" type="date" required></div>
+          <div class="field"><label for="f-end">Date de fin (facultative)</label><input id="f-end" class="control" type="date"></div>
+          <div class="field">
+            <label for="f-method">Mode de paiement *</label>
+            <select id="f-method" class="control"><option>Espèces</option><option>Mobile Money</option><option>Carte bancaire</option><option>Virement</option><option>Autre</option></select>
+          </div>
+          <div class="field"><label for="f-provider">Fournisseur / bénéficiaire *</label><input id="f-provider" class="control" maxlength="100" required></div>
+          <div class="field">
+            <label for="f-logo">Logo ou icône</label>
+            <select id="f-logo" class="control">
+              <option value="auto">Détection automatique selon le nom</option>
+              <option value="category">Icône de catégorie</option>
+              <option value="netflix">Netflix</option>
+              <option value="spotify">Spotify</option>
+              <option value="youtube">YouTube Premium</option>
+              <option value="chatgpt">ChatGPT</option>
+              <option value="disney">Disney+</option>
+              <option value="canva">Canva</option>
+              <option value="icloud">iCloud</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-status">Gestion *</label>
+            <select id="f-status" class="control"><option value="upcoming">Active</option><option value="cancelled">Résiliée</option></select>
+          </div>
+          <div class="field sm:col-span-2"><label for="f-notes">Notes (facultatives)</label><textarea id="f-notes" class="control" rows="2" maxlength="500"></textarea></div>
+        </div>
+        <p id="form-error" class="danger mt-4" role="alert" hidden></p>
+        <div class="flex justify-end gap-3 mt-6">
+          <button type="button" data-close="expense-overlay" class="secondary">Annuler</button>
+          <button type="submit" class="primary">Enregistrer</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <!-- FORMULAIRE PAIEMENT -->
+  <div id="payment-overlay" class="dialog-backdrop" hidden>
+    <section class="dialog card" role="dialog" aria-modal="true" aria-labelledby="payment-title">
+      <h2 id="payment-title" class="section-heading mb-2">Enregistrer un paiement</h2>
+      <p id="payment-context" class="muted mb-5"></p>
+      <form id="payment-form" novalidate>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div class="field"><label for="p-amount">Montant réellement payé *</label><input id="p-amount" type="number" min="0.01" step="0.01" class="control" required></div>
+          <div class="field"><label for="p-date">Date réelle du paiement *</label><input id="p-date" type="date" class="control" required></div>
+          <div class="field">
+            <label for="p-method">Mode de paiement *</label>
+            <select id="p-method" class="control"><option>Espèces</option><option>Mobile Money</option><option>Carte bancaire</option><option>Virement</option><option>Autre</option></select>
+          </div>
+          <div class="field sm:col-span-2"><label for="p-note">Note (facultative)</label><textarea id="p-note" class="control" rows="2" maxlength="500"></textarea></div>
+        </div>
+        <p id="payment-error" class="danger mt-4" role="alert" hidden></p>
+        <div class="flex justify-end gap-3 mt-6">
+          <button type="button" data-close="payment-overlay" class="secondary">Annuler</button>
+          <button type="submit" class="primary">Confirmer le paiement</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <!-- SUPPRESSION DÉPENSE -->
+  <div id="delete-overlay" class="dialog-backdrop" hidden>
+    <section class="dialog card max-w-md" role="dialog" aria-modal="true" aria-labelledby="delete-title">
+      <h2 id="delete-title" class="section-heading">Supprimer cette dépense ?</h2>
+      <p class="muted mt-3 mb-6">La dépense sera supprimée. Ses paiements seront conservés dans l’historique.</p>
+      <div class="flex gap-3 justify-end">
+        <button type="button" data-close="delete-overlay" class="secondary">Annuler</button>
+        <button id="confirm-delete" type="button" class="primary">Supprimer</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- SUPPRESSION PAIEMENT -->
+  <div id="payment-delete-overlay" class="dialog-backdrop" hidden>
+    <section class="dialog card max-w-md" role="dialog" aria-modal="true" aria-labelledby="payment-delete-title">
+      <h2 id="payment-delete-title" class="section-heading">Supprimer ce paiement ?</h2>
+      <p class="muted mt-3 mb-6">L’échéance redeviendra impayée si elle est toujours active.</p>
+      <div class="flex gap-3 justify-end">
+        <button type="button" data-close="payment-delete-overlay" class="secondary">Annuler</button>
+        <button id="confirm-payment-delete" type="button" class="primary">Supprimer le paiement</button>
+      </div>
+    </section>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <template id="expense-row-template">
+    <article class="expense-row">
+      <span class="expense-icon" aria-hidden="true"><span class="logo-mark category">•</span></span>
+      <div class="min-w-0 flex-1">
+        <p class="row-name font-bold truncate"></p>
+        <p class="row-meta muted text-xs mt-1"></p>
+        <span class="row-badge badge mt-2"></span>
+      </div>
+      <div class="text-right">
+        <p class="row-amount font-bold whitespace-nowrap"></p>
+        <p class="row-days muted text-xs mt-1"></p>
+      </div>
+      <div class="row-actions flex gap-2 items-center flex-wrap" hidden>
+        <button type="button" class="row-pay secondary !py-1 !text-xs">Payer</button>
+        <button type="button" class="row-edit secondary !py-1 !text-xs">Modifier</button>
+        <button type="button" class="row-delete secondary danger !py-1 !text-xs">Supprimer</button>
+      </div>
+    </article>
+  </template>
+
+  <template id="history-row-template">
+    <article class="expense-row">
+      <span class="expense-icon" aria-hidden="true"><i data-lucide="check"></i></span>
+      <div class="min-w-0 flex-1">
+        <p class="history-name font-bold"></p>
+        <p class="history-meta muted text-xs mt-1"></p>
+        <span class="badge paid mt-2">Payée</span>
+      </div>
+      <div class="text-right">
+        <p class="history-amount font-bold"></p>
+        <p class="history-planned muted text-xs mt-1"></p>
+      </div>
+      <button type="button" class="history-open secondary !py-1 !text-xs">Consulter</button>
+    </article>
+  </template>
+
+  <!-- L'ordre compte : data-sdk.js avant script.js -->
+  <script src="data-sdk.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
